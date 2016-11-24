@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class MainActivity extends Activity implements android.bluetooth.BluetoothAdapter.LeScanCallback {
 
-    private final String TAG = "BTConnectorSample";
+    private final String TAG = "BTConnectorSample2";
     private static final int PERMISSION_REQUEST_TAG = 1;
     private boolean isLocationServiceOn = false, isBluetoothServiceOn = false, isBluetoothAdminServiceOn = false;
     private final String[] permissionRequired = new String[]{
@@ -38,20 +38,24 @@ public class MainActivity extends Activity implements android.bluetooth.Bluetoot
         mAdapter = new CustomAdapter(this, null);
         lv.setAdapter(mAdapter);
         checkPermission();
+        mHandler.post(r);
     }
 
     @Override
     protected void onDestroy() {
         stopScanMethod();
         map = new HashMap<>();
+        mHandler.removeCallbacks(r);
         super.onDestroy();
     }
 
-    private Runnable r = new Runnable(){
+    private Runnable r = new Runnable() {
         @Override
         public void run() {
             mAdapter.setData(map.values());
             mAdapter.notifyDataSetChanged();
+            mHandler.removeCallbacks(this);
+            mHandler.postDelayed(r, 5000);
         }
     };
 
@@ -88,6 +92,7 @@ public class MainActivity extends Activity implements android.bluetooth.Bluetoot
     }
 
     private void initScanMethod() {
+        android.util.Log.d(TAG, "initScanMethod");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothAdapter.startLeScan(this);
     }
@@ -130,7 +135,9 @@ public class MainActivity extends Activity implements android.bluetooth.Bluetoot
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
         Beacon beacon = new Beacon(scanRecord, rssi);
-        map.put(beacon.id1+"_"+beacon.id2+"_"+beacon.id3, beacon);
-        
+        if (!beacon.id2.equals("0") && !beacon.id3.equals("0")) {
+            map.put(beacon.id1 + "_" + beacon.id2 + "_" + beacon.id3, beacon);
+            android.util.Log.d(TAG, "detected " + beacon.id1 + "_" + beacon.id2 + "_" + beacon.id3);
+        }
     }
 }

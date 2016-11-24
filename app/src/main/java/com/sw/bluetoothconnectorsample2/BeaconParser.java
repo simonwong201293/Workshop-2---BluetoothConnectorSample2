@@ -28,9 +28,7 @@ public class BeaconParser {
 
     public static String getUuidFromByteArray(byte[] advertisement) {
         byte[] uuid = new byte[16];
-        for (int i = 0; ; i = (byte) (i + 1)) {
-            if (i >= (byte) 16)
-                break;
+        for (int i = 0; i < (byte) 16; i = (byte) (i + 1)) {
             uuid[i] = (advertisement[(byte) 9 + i]);
         }
         return new StringBuilder(
